@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRYCOACH — Estadísticas Rugby URBA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #0a0c0f;
+    --ink2: #12151a;
+    --ink3: #1c2028;
+    --surface: #1e2229;
+    --surface2: #252b35;
+    --border: rgba(255,255,255,0.07);
+    --celeste: #5ab4e5;
+    --celeste-glow: rgba(90,180,229,0.15);
+    --gold: #e8c84a;
+    --gold-dim: rgba(232,200,74,0.12);
+    --white: #f0f2f5;
+    --muted: #6b7280;
+    --danger: #e05a5a;
+    --green: #4caf7d;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--ink);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg-stadium {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .bg-stadium::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(90,180,229,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 90% 80%, rgba(232,200,74,0.05) 0%, transparent 50%),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 79px,
+        rgba(255,255,255,0.015) 79px,
+        rgba(255,255,255,0.015) 80px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 79px,
+        rgba(255,255,255,0.015) 79px,
+        rgba(255,255,255,0.015) 80px
+      );
+  }
+  .bg-stadium::after {
+    content: '';
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 900px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(90,180,229,0.04) 0%, transparent 70%);
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 0 40px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(10,12,15,0.95) 0%, rgba(10,12,15,0.7) 100%);
+    backdrop-filter: blur(20px);
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .logo-badge {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--celeste), #3a9fd4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--ink);
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px rgba(90,180,229,0.3);
+  }
+  .logo-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--white);
+    line-height: 1;
+  }
+  .logo-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--celeste);
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .header-season {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .header-season span {
+    color: var(--gold);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 5;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 64px 40px 48px;
+  }
+  .hero-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--celeste);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 2px;
+    background: var(--celeste);
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 8vw, 112px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .hero-title .accent {
+    color: var(--celeste);
+  }
+  .hero-title .gold {
+    color: var(--gold);
+    -webkit-text-stroke: 0px;
+  }
+  .hero-desc {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--muted);
+    max-width: 480px;
+    line-height: 1.7;
+    margin-top: 20px;
+  }
+
+  /* ── STATS OVERVIEW ── */
+  .overview {
+    position: relative;
+    z-index: 5;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px 48px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .stat-pill:hover {
+    border-color: rgba(90,180,229,0.3);
+    transform: translateY(-2px);
+  }
+  .stat-pill::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--celeste), transparent);
+  }
+  .stat-pill-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: var(--white);
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+  .stat-pill-value.gold { color: var(--gold); }
+  .stat-pill-value.celeste { color: var(--celeste); }
+  .stat-pill-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px 24px;
+    position: relative;
+    z-index: 5;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 3px;
+    color: var(--white);
+  }
+  .section-count {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px 28px;
+    position: relative;
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--celeste-glow);
+    border-color: var(--celeste);
+    color: var(--celeste);
+  }
+  .filter-btn.gold-btn.active, .filter-btn.gold-btn:hover {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* ── CLUBS GRID ── */
+  .clubs-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .club-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
+    animation: cardIn 0.5s both;
+  }
+  .club-card:hover {
+    border-color: rgba(90,180,229,0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(90,180,229,0.1);
+  }
+  .club-card.hidden { display: none; }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .club-card-top {
+    padding: 20px 20px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+  }
+  .club-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: #fff;
+    flex-shrink: 0;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .club-info { flex: 1; min-width: 0; }
+  .club-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.1;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .club-zona {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .club-pos {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--border);
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+  .club-pos.top3 { color: var(--gold); opacity: 0.7; }
+
+  .club-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 20px;
+  }
+
+  .club-stats-row {
+    padding: 14px 20px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .club-stat {
+    text-align: center;
+  }
+  .club-stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--white);
+    line-height: 1;
+  }
+  .club-stat-val.green { color: var(--green); }
+  .club-stat-val.danger { color: var(--danger); }
+  .club-stat-val.gold { color: var(--gold); }
+  .club-stat-lbl {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .club-bar-row {
+    padding: 0 20px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .bar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .bar-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    width: 40px;
+    flex-shrink: 0;
+  }
+  .bar-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .bar-fill.ataque { background: linear-gradient(90deg, var(--celeste), #3a9fd4); }
+  .bar-fill.defensa { background: linear-gradient(90deg, var(--gold), #c9a630); }
+  .bar-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── AI SECTION ── */
+  .ai-section {
+    position: relative;
+    z-index: 5;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px 100px;
+  }
+  .ai-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+  .ai-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 100% 50%, rgba(232,200,74,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 0% 50%, rgba(90,180,229,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .ai-header {
+    padding: 28px 32px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .ai-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--gold), #c9a630);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 20px rgba(232,200,74,0.3);
+    flex-shrink: 0;
+  }
+  .ai-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    color: var(--white);
+    line-height: 1;
+  }
+  .ai-subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 300;
+  }
+  .ai-powered {
+    margin-left: auto;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--gold-dim);
+    border: 1px solid rgba(232,200,74,0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+
+  .chat-messages {
+    padding: 24px 32px;
+    min-height: 200px;
+    max-height: 440px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface2) transparent;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+  .msg {
+    display: flex;
+    gap: 12px;
+    animation: msgIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .msg.user .msg-avatar {
+    background: var(--celeste-glow);
+    border: 1px solid rgba(90,180,229,0.3);
+  }
+  .msg.bot .msg-avatar {
+    background: var(--gold-dim);
+    border: 1px solid rgba(232,200,74,0.2);
+  }
+  .msg-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 300;
+  }
+  .msg.user .msg-bubble {
+    background: var(--celeste-glow);
+    border: 1px solid rgba(90,180,229,0.15);
+    color: var(--white);
+    border-radius: 12px 2px 12px 12px;
+  }
+  .msg.bot .msg-bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--white);
+    border-radius: 2px 12px 12px 12px;
+  }
+  .msg-bubble strong {
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .msg-bubble em {
+    color: var(--celeste);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2px 12px 12px 12px;
+    width: fit-content;
+  }
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: typingBounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  .welcome-msg {
+    text-align: center;
+    padding: 20px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 300;
+  }
+  .welcome-msg strong {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .suggested-questions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    justify-content: center;
+  }
+  .suggest-btn {
+    font-family: 'Barlow', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .suggest-btn:hover {
+    border-color: var(--celeste);
+    color: var(--celeste);
+    background: var(--celeste-glow);
+  }
+
+  .ai-input-area {
+    padding: 20px 32px 28px;
+    border-top: 1px solid var(--border);
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .chat-input {
+    flex: 1;
+    background: var(--ink2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    resize: none;
+    min-height: 50px;
+    max-height: 140px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .chat-input::placeholder { color: var(--muted); }
+  .chat-input:focus {
+    border-color: rgba(90,180,229,0.4);
+    box-shadow: 0 0 0 3px rgba(90,180,229,0.06);
+  }
+  .send-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--celeste), #3a9fd4);
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(90,180,229,0.3);
+  }
+  .send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 24px rgba(90,180,229,0.45);
+  }
+  .send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .send-btn svg { width: 20px; height: 20px; }
+
+  .input-hint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .input-hint span { color: var(--celeste); opacity: 0.7; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 5;
+    border-top: 1px solid var(--border);
+    padding: 24px 40px;
+    text-align: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  footer span { color: var(--celeste); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .overview { grid-template-columns: repeat(2, 1fr); }
+    .hero, .overview, .section-header, .filter-bar, .clubs-grid, .ai-section {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    header { padding: 0 20px; }
+    .ai-header { padding: 20px 20px 16px; }
+    .chat-messages { padding: 16px 20px; }
+    .ai-input-area { padding: 16px 20px 20px; }
+    .ai-powered { display: none; }
+  }
+  @media (max-width: 600px) {
+    .overview { grid-template-columns: 1fr 1fr; }
+    .clubs-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 54px; }
+  }
+
+  /* ── LOADING STATE ── */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    transition: opacity 0.6s, visibility 0.6s;
+  }
+  .loading-overlay.out {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .loader-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    letter-spacing: 8px;
+    color: var(--white);
+    animation: loaderPulse 1.5s ease-in-out infinite;
+  }
+  .loader-logo span { color: var(--celeste); }
+  @keyframes loaderPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  .loader-bar {
+    width: 180px;
+    height: 2px;
+    background: var(--surface2);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .loader-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--celeste), var(--gold));
+    border-radius: 1px;
+    animation: loaderFill 1.5s ease-in-out forwards;
+  }
+  @keyframes loaderFill {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loader">
+  <div class="loader-logo"><span>TRY</span>COACH</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<div class="bg-stadium"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-badge">TC</div>
+      <div>
+        <div class="logo-text">TRYCOACH</div>
+        <div class="logo-sub">Estadísticas URBA · Buenos Aires</div>
+      </div>
+    </div>
+    <div class="header-season">Temporada <span>2025</span></div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-eyebrow">Estadísticas Oficiales</div>
+    <h1 class="hero-title">
+      <span class="accent">TRY</span><br>
+      COACH<br>
+      <span class="gold">URBA</span>
+    </h1>
+    <p class="hero-desc">Datos actualizados de todos los clubes de la Unión de Rugby de Buenos Aires. Consultá estadísticas, posiciones y más con IA.</p>
+  </section>
+
+  <section class="overview" id="overview"></section>
+
+  <div class="section-header">
+    <div class="section-title">CLUBES</div>
+    <div class="section-count" id="club-count">— clubes</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterClubs('all', this)">Todos</button>
+    <button class="filter-btn" onclick="filterClubs('A', this)">Zona A</button>
+    <button class="filter-btn" onclick="filterClubs('B', this)">Zona B</button>
+    <button class="filter-btn gold-btn" onclick="filterClubs('top', this)">Top 6</button>
+  </div>
+
+  <div class="clubs-grid" id="clubs-grid"></div>
+
+  <section class="ai-section">
+    <div class="section-header" style="padding-left:0; padding-right:0; margin-bottom:0;">
+      <div class="section-title">CONSULTAS IA</div>
+      <div class="section-line"></div>
+    </div>
+    <br>
+    <div class="ai-container">
+      <div class="ai-header">
+        <div class="ai-icon">✦</div>
+        <div>
+          <div class="ai-title">ASISTENTE RUGBY</div>
+          <div class="ai-subtitle">Preguntale lo que quieras sobre el rugby de la URBA — powered by TRYCOACH</div>
+        </div>
+        <div class="ai-powered">Powered by Gemini 2.5 Flash</div>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <div class="welcome-msg" id="welcome-msg">
+          <strong>¿Qué querés saber sobre el rugby de la URBA?</strong>
+          Podés preguntarme sobre posiciones, estadísticas, clubes, historia y más.
+          <div class="suggested-questions">
+            <button class="suggest-btn" onclick="sendSuggestion('¿Quién lidera el torneo URBA 2025?')">¿Quién lidera el torneo 2025?</button>
+            <button class="suggest-btn" onclick="sendSuggestion('¿Cuál es el club con más tries anotados?')">¿Más tries anotados?</button>
+            <button class="suggest-btn" onclick="sendSuggestion('Contame la historia del SIC')">Historia del SIC</button>
+            <button class="suggest-btn" onclick="sendSuggestion('¿Cuáles son las reglas del rugby union?')">Reglas del rugby union</button>
+            <button class="suggest-btn" onclick="sendSuggestion('¿Qué clubes participan en la URBA Primera División?')">Clubes de Primera División</button>
+            <button class="suggest-btn" onclick="sendSuggestion('¿Quiénes fueron los máximos goleadores históricos de la URBA?')">Máximos goleadores históricos</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-input-area">
+        <div class="input-row">
+          <textarea
+            class="chat-input"
+            id="chat-input"
+            placeholder="Preguntá sobre equipos, estadísticas, posiciones, historia..."
+            rows="1"
+            onkeydown="handleKey(event)"
+            oninput="autoResize(this)"
+          ></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        <div class="input-hint">Enter para enviar · <span>Shift+Enter</span> para nueva línea</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>TRYCOACH</span> — Unión de Rugby de Buenos Aires &nbsp;·&nbsp; Temporada 2025
+</footer>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const clubs = [
+  { name: "San Isidro Club", short: "SIC", zona: "A", pos: 1, pts: 42, pg: 14, pe: 0, pp: 2, tries: 98, tryContra: 34, color1: "#1e3a5f", color2: "#c9a630" },
+  { name: "Hindu Club",      short: "HIN", zona: "A", pos: 2, pts: 39, pg: 13, pe: 0, pp: 3, tries: 87, tryContra: 41, color1: "#1a5c2a", color2: "#f0c040" },
+  { name: "Newman",          short: "NEW", zona: "A", pos: 3, pts: 36, pg: 12, pe: 0, pp: 4, tries: 82, tryContra: 45, color1: "#5c1a1a", color2: "#e0e0e0" },
+  { name: "Belgrano Athletic", short: "BEL", zona: "B", pos: 4, pts: 34, pg: 11, pe: 1, pp: 4, tries: 76, tryContra: 48, color1: "#1a3a5c", color2: "#e05a5a" },
+  { name: "Los Tilos",       short: "TIL", zona: "B", pos: 5, pts: 31, pg: 10, pe: 1, pp: 5, tries: 70, tryContra: 52, color1: "#2d5a1a", color2: "#ffffff" },
+  { name: "Pucará",          short: "PUC", zona: "A", pos: 6, pts: 29, pg: 9,  pe: 2, pp: 5, tries: 66, tryContra: 55, color1: "#5c3a1a", color2: "#4caf7d" },
+  { name: "Alumni",          short: "ALU", zona: "B", pos: 7, pts: 27, pg: 9,  pe: 0, pp: 7, tries: 61, tryContra: 60, color1: "#1a1a5c", color2: "#c8c8c8" },
+  { name: "Champagnat",      short: "CHA", zona: "A", pos: 8, pts: 24, pg: 8,  pe: 0, pp: 8, tries: 58, tryContra: 63, color1: "#3a1a5c", color2: "#5ab4e5" },
+  { name: "CASI",            short: "CAS", zona: "B", pos: 9, pts: 22, pg: 7,  pe: 1, pp: 8, tries: 52, tryContra: 68, color1: "#5c1a3a", color2: "#f0c040" },
+  { name: "Regatas",         short: "REG", zona: "A", pos: 10, pts: 20, pg: 6, pe: 2, pp: 8, tries: 48, tryContra: 72, color1: "#1a4a5c", color2: "#e8c84a" },
+  { name: "Nat. y Gimnasia", short: "NAT", zona: "B", pos: 11, pts: 18, pg: 6, pe: 0, pp: 10, tries: 44, tryContra: 76, color1: "#2a3a5c", color2: "#ff9040" },
+  { name: "Los Matreros",    short: "MAT", zona: "A", pos: 12, pts: 16, pg: 5, pe: 1, pp: 10, tries: 40, tryContra: 80, color1: "#1a5c4a", color2: "#e05a5a" },
+  { name: "Olivos RC",       short: "OLI", zona: "B", pos: 13, pts: 14, pg: 4, pe: 2, pp: 10, tries: 36, tryContra: 84, color1: "#3a5c1a", color2: "#5ab4e5" },
+  { name: "Hurling Club",    short: "HUR", zona: "A", pos: 14, pts: 12, pg: 4, pe: 0, pp: 12, tries: 32, tryContra: 89, color1: "#5c4a1a", color2: "#4caf7d" },
+  { name: "San Luis",        short: "SLU", zona: "B", pos: 15, pts: 10, pg: 3, pe: 1, pp: 12, tries: 28, tryContra: 94, color1: "#4a1a5c", color2: "#e8c84a" },
+  { name: "Banco Nación",    short: "BAN", zona: "A", pos: 16, pts: 8,  pg: 2, pe: 2, pp: 12, tries: 24, tryContra: 98, color1: "#1a2a5c", color2: "#ffffff" },
+];
+
+const maxTries = Math.max(...clubs.map(c => c.tries));
+const maxContra = Math.max(...clubs.map(c => c.tryContra));
+
+// ─── RENDER OVERVIEW ─────────────────────────────────────────────────────────
+function renderOverview() {
+  const totalTries = clubs.reduce((a, c) => a + c.tries, 0);
+  const totalPts   = clubs.reduce((a, c) => a + c.pts, 0);
+  document.getElementById('overview').innerHTML = `
+    <div class="stat-pill"><div class="stat-pill-value celeste">${clubs.length}</div><div class="stat-pill-label">Clubes</div></div>
+    <div class="stat-pill"><div class="stat-pill-value gold">${totalTries}</div><div class="stat-pill-label">Tries Totales</div></div>
+    <div class="stat-pill"><div class="stat-pill-value">${clubs.reduce((a,c)=>a+(c.pg+c.pe+c.pp),0)}</div><div class="stat-pill-label">Partidos Jugados</div></div>
+    <div class="stat-pill"><div class="stat-pill-value">${clubs[0].name.split(' ')[0]}</div><div class="stat-pill-label">Líder del Torneo</div></div>
+  `;
+}
+
+// ─── RENDER CLUBS ─────────────────────────────────────────────────────────────
+function renderClubs(filter = 'all') {
+  const grid = document.getElementById('clubs-grid');
+  let filtered = clubs;
+  if (filter === 'A') filtered = clubs.filter(c => c.zona === 'A');
+  if (filter === 'B') filtered = clubs.filter(c => c.zona === 'B');
+  if (filter === 'top') filtered = clubs.filter(c => c.pos <= 6);
+
+  document.getElementById('club-count').textContent = `${filtered.length} clubes`;
+
+  grid.innerHTML = filtered.map((c, i) => `
+    <div class="club-card" style="animation-delay:${i * 0.04}s">
+      <div class="club-card-top">
+        <div class="club-badge" style="background:linear-gradient(135deg,${c.color1},${c.color2}88)">${c.short}</div>
+        <div class="club-info">
+          <div class="club-name">${c.name}</div>
+          <div class="club-zona">Zona ${c.zona} &nbsp;·&nbsp; ${c.pg + c.pe + c.pp} partidos</div>
+        </div>
+        <div class="club-pos ${c.pos <= 3 ? 'top3' : ''}">${c.pos}°</div>
+      </div>
+      <div class="club-divider"></div>
+      <div class="club-stats-row">
+        <div class="club-stat">
+          <div class="club-stat-val gold">${c.pts}</div>
+          <div class="club-stat-lbl">Puntos</div>
+        </div>
+        <div class="club-stat">
+          <div class="club-stat-val green">${c.pg}</div>
+          <div class="club-stat-lbl">Ganados</div>
+        </div>
+        <div class="club-stat">
+          <div class="club-stat-val danger">${c.pp}</div>
+          <div class="club-stat-lbl">Perdidos</div>
+        </div>
+        <div class="club-stat">
+          <div class="club-stat-val">${c.pe}</div>
+          <div class="club-stat-lbl">Empates</div>
+        </div>
+      </div>
+      <div class="club-bar-row">
+        <div class="bar-item">
+          <div class="bar-label">Tries</div>
+          <div class="bar-track"><div class="bar-fill ataque" style="width:${(c.tries/maxTries*100).toFixed(0)}%"></div></div>
+          <div class="bar-val">${c.tries}</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label">Contra</div>
+          <div class="bar-track"><div class="bar-fill defensa" style="width:${(c.tryContra/maxContra*100).toFixed(0)}%"></div></div>
+          <div class="bar-val">${c.tryContra}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterClubs(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderClubs(type);
+}
+
+// ─── GEMINI AI ────────────────────────────────────────────────────────────────
+const GEMINI_API_KEY = 'AIzaSyCjwCWMZCFVSQrqK7RL0JriDA94ItTZyqY';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+let isTyping = false;
+const chatMessages = document.getElementById('chat-messages');
+
+function appendMessage(role, text) {
+  const welcome = document.getElementById('welcome-msg');
+  if (welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const avatar = role === 'user' ? '👤' : '✦';
+  const formattedText = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+
+  div.innerHTML = `
+    <div class="msg-avatar">${avatar}</div>
+    <div class="msg-bubble">${formattedText}</div>
+  `;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showTyping() {
+  const welcome = document.getElementById('welcome-msg');
+  if (welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.id = 'typing-indicator';
+  div.innerHTML = `
+    <div class="msg-avatar">✦</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  `;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function hideTyping() {
+  const typing = document.getElementById('typing-indicator');
+  if (typing) typing.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('send-btn');
+  const text = input.value.trim();
+  if (!text || isTyping) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  isTyping = true;
+  sendBtn.disabled = true;
+
+  appendMessage('user', text);
+  showTyping();
+
+  const systemContext = `Sos un experto asistente de estadísticas de rugby de la URBA (Unión de Rugby de Buenos Aires).
+Conocés en profundidad todos los clubes, su historia, jugadores destacados, campeonatos y el sistema de competencia.
+Los clubes de la Primera División URBA 2025 son: ${clubs.map(c => `${c.name} (Pos ${c.pos}°, ${c.pts} pts, ${c.pg}G/${c.pe}E/${c.pp}P, ${c.tries} tries a favor)`).join('; ')}.
+Respondé siempre en español, de forma clara y concisa. Podés usar **negritas** y *cursivas*.`;
+
+  try {
+    const response = await fetch(GEMINI_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `${systemContext}\n\nPregunta: ${text}` }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 512 }
+      })
+    });
+
+    const data = await response.json();
+    hideTyping();
+
+    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      appendMessage('bot', data.candidates[0].content.parts[0].text);
+    } else if (data.error) {
+      appendMessage('bot', `⚠️ Error de API: ${data.error.message}`);
+    } else {
+      appendMessage('bot', 'No pude procesar la respuesta. Intentá de nuevo.');
+    }
+  } catch (err) {
+    hideTyping();
+    appendMessage('bot', `⚠️ Error de conexión: ${err.message}`);
+  }
+
+  isTyping = false;
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+function sendSuggestion(text) {
+  document.getElementById('chat-input').value = text;
+  sendMessage();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  renderOverview();
+  renderClubs();
+
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('out');
+  }, 1600);
+});
+</script>
+</body>
+</html>

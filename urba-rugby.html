@@ -899,7 +899,7 @@
           <div class="ai-title">ANÁLISIS TÁCTICO</div>
           <div class="ai-subtitle">Ingresá el rival y recibí estrategia, fortalezas, debilidades y plan de 80 minutos</div>
         </div>
-        <div class="ai-powered">Powered by Gemini 2.5 Flash</div>
+        <div class="ai-powered">Powered by Ollama</div>
       </div>
 
       <div class="chat-messages" id="chat-messages">
@@ -1042,10 +1042,10 @@ function filterClubs(type, btn) {
 }
 
 // ─── APIs ────────────────────────────────────────────────────────────────────
-const GEMINI_API_KEY = '__GEMINI_API_KEY__';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 const OLLAMA_API_KEY = '__OLLAMA_API_KEY__';
 const OLLAMA_SEARCH_URL = 'https://ollama.com/api/web_search';
+const OLLAMA_CHAT_URL  = 'https://ollama.com/api/chat';
+const OLLAMA_MODEL     = 'gemma3';
 
 let isTyping = false;
 const chatMessages = document.getElementById('chat-messages');
@@ -1150,58 +1150,54 @@ async function sendMessage() {
 
   updateTypingText('Generando análisis táctico...');
 
-  const systemContext = `Sos TRYCOACH, un asistente táctico experto en rugby de la URBA (Unión de Rugby de Buenos Aires).
-Cuando el usuario mencione un rival o un partido, SIEMPRE respondé con el siguiente formato estructurado:
+  const prompt = `Sos TRYCOACH, un asistente táctico experto en rugby de la URBA (Unión de Rugby de Buenos Aires).
+Cuando el usuario mencione un rival, SIEMPRE respondé con este formato:
 
----
 ## 🔴 FORTALEZAS DEL RIVAL
-- Listá los puntos fuertes del equipo rival (scrum, line, juego aéreo, velocidad en los backs, etc.)
+- Puntos fuertes (scrum, line, backs, juego aéreo, etc.)
 
 ## 🟢 DEBILIDADES DEL RIVAL
-- Listá las vulnerabilidades que se pueden explotar
+- Vulnerabilidades a explotar
 
 ## ⚡ ESTRATEGIA GENERAL
-- Plan de juego recomendado para enfrentarlo
+- Plan de juego recomendado
 
 ## 🕐 PLAN DE 80 MINUTOS
-
 **Minutos 1–20 — Tanteo y presión inicial**
-- Qué hacer en la apertura del partido
-
-**Minutos 21–40 — Desarrollo y ajustes**
-- Cómo administrar el juego en el primer tiempo
-
-**Minutos 41–60 — Primer tiempo del segundo**
-- Ajustes según cómo se presenta el marcador
-
+**Minutos 21–40 — Desarrollo**
+**Minutos 41–60 — Ajustes segundo tiempo**
 **Minutos 61–80 — Cierre**
-- Estrategia de cierre, si defender ventaja o ir a buscar el resultado
 
 ## 🔄 CAMBIOS / BANCO
-- Indicá SI o NO conviene hacer cambios en cada etapa y en qué posiciones priorizarlos (pilares, hooker, alas, etc.)
----
+- SI o NO conviene cambiar en cada etapa y qué posiciones priorizar
 
 Estadísticas URBA 2025: ${statsContext}.${webContext}
-Respondé siempre en español. Usá **negritas** para puntos clave. Si la pregunta no es sobre un rival específico, respondé de forma general con el mismo enfoque táctico.`;
+Respondé en español. Usá **negritas** para puntos clave.
+
+Pregunta: ${text}`;
 
   try {
-    const response = await fetch(GEMINI_URL, {
+    const response = await fetch(OLLAMA_CHAT_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OLLAMA_API_KEY}`
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: `${systemContext}\n\nPregunta: ${text}` }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+        model: OLLAMA_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        stream: false
       })
     });
 
     const data = await response.json();
     hideTyping();
 
-    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    if (data.message?.content) {
       const badge = webData ? '\n\n*🌐 Análisis enriquecido con datos en tiempo real*' : '';
-      appendMessage('bot', data.candidates[0].content.parts[0].text + badge);
+      appendMessage('bot', data.message.content + badge);
     } else if (data.error) {
-      appendMessage('bot', `⚠️ Error de API: ${data.error.message}`);
+      appendMessage('bot', `⚠️ Error de API: ${data.error}`);
     } else {
       appendMessage('bot', 'No pude procesar la respuesta. Intentá de nuevo.');
     }

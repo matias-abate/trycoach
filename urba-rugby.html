@@ -896,23 +896,23 @@
       <div class="ai-header">
         <div class="ai-icon">✦</div>
         <div>
-          <div class="ai-title">ASISTENTE RUGBY</div>
-          <div class="ai-subtitle">Preguntale lo que quieras sobre el rugby de la URBA — powered by TRYCOACH</div>
+          <div class="ai-title">ANÁLISIS TÁCTICO</div>
+          <div class="ai-subtitle">Ingresá el rival y recibí estrategia, fortalezas, debilidades y plan de 80 minutos</div>
         </div>
         <div class="ai-powered">Powered by Gemini 2.5 Flash</div>
       </div>
 
       <div class="chat-messages" id="chat-messages">
         <div class="welcome-msg" id="welcome-msg">
-          <strong>¿Qué querés saber sobre el rugby de la URBA?</strong>
-          Podés preguntarme sobre posiciones, estadísticas, clubes, historia y más.
+          <strong>¿Contra quién jugás?</strong>
+          Decime el rival y te armo el análisis táctico completo: fortalezas, debilidades, estrategia y plan minuto a minuto de los 80 minutos.
           <div class="suggested-questions">
-            <button class="suggest-btn" onclick="sendSuggestion('¿Quién lidera el torneo URBA 2025?')">¿Quién lidera el torneo 2025?</button>
-            <button class="suggest-btn" onclick="sendSuggestion('¿Cuál es el club con más tries anotados?')">¿Más tries anotados?</button>
-            <button class="suggest-btn" onclick="sendSuggestion('Contame la historia del SIC')">Historia del SIC</button>
-            <button class="suggest-btn" onclick="sendSuggestion('¿Cuáles son las reglas del rugby union?')">Reglas del rugby union</button>
-            <button class="suggest-btn" onclick="sendSuggestion('¿Qué clubes participan en la URBA Primera División?')">Clubes de Primera División</button>
-            <button class="suggest-btn" onclick="sendSuggestion('¿Quiénes fueron los máximos goleadores históricos de la URBA?')">Máximos goleadores históricos</button>
+            <button class="suggest-btn" onclick="sendSuggestion('Vamos a jugar contra el SIC, dame el análisis táctico completo')">vs SIC</button>
+            <button class="suggest-btn" onclick="sendSuggestion('Vamos a jugar contra Hindu Club, dame el análisis táctico completo')">vs Hindu Club</button>
+            <button class="suggest-btn" onclick="sendSuggestion('Vamos a jugar contra Newman, dame el análisis táctico completo')">vs Newman</button>
+            <button class="suggest-btn" onclick="sendSuggestion('Vamos a jugar contra Belgrano Athletic, dame el análisis táctico completo')">vs Belgrano Athletic</button>
+            <button class="suggest-btn" onclick="sendSuggestion('Vamos a jugar contra Alumni, dame el análisis táctico completo')">vs Alumni</button>
+            <button class="suggest-btn" onclick="sendSuggestion('Vamos a jugar contra Pucará, dame el análisis táctico completo')">vs Pucará</button>
           </div>
         </div>
       </div>
@@ -1107,10 +1107,41 @@ async function sendMessage() {
   appendMessage('user', text);
   showTyping();
 
-  const systemContext = `Sos un experto asistente de estadísticas de rugby de la URBA (Unión de Rugby de Buenos Aires).
-Conocés en profundidad todos los clubes, su historia, jugadores destacados, campeonatos y el sistema de competencia.
-Los clubes de la Primera División URBA 2025 son: ${clubs.map(c => `${c.name} (Pos ${c.pos}°, ${c.pts} pts, ${c.pg}G/${c.pe}E/${c.pp}P, ${c.tries} tries a favor)`).join('; ')}.
-Respondé siempre en español, de forma clara y concisa. Podés usar **negritas** y *cursivas*.`;
+  const statsContext = clubs.map(c => `${c.name} (Pos ${c.pos}°, ${c.pts} pts, ${c.pg}G/${c.pe}E/${c.pp}P, ${c.tries} tries a favor, ${c.tryContra} en contra)`).join('; ');
+
+  const systemContext = `Sos TRYCOACH, un asistente táctico experto en rugby de la URBA (Unión de Rugby de Buenos Aires).
+Cuando el usuario mencione un rival o un partido, SIEMPRE respondé con el siguiente formato estructurado:
+
+---
+## 🔴 FORTALEZAS DEL RIVAL
+- Listá los puntos fuertes del equipo rival (scrum, line, juego aéreo, velocidad en los backs, etc.)
+
+## 🟢 DEBILIDADES DEL RIVAL
+- Listá las vulnerabilidades que se pueden explotar
+
+## ⚡ ESTRATEGIA GENERAL
+- Plan de juego recomendado para enfrentarlo
+
+## 🕐 PLAN DE 80 MINUTOS
+
+**Minutos 1–20 — Tanteo y presión inicial**
+- Qué hacer en la apertura del partido
+
+**Minutos 21–40 — Desarrollo y ajustes**
+- Cómo administrar el juego en el primer tiempo
+
+**Minutos 41–60 — Primer tiempo del segundo**
+- Ajustes según cómo se presenta el marcador
+
+**Minutos 61–80 — Cierre**
+- Estrategia de cierre, si defender ventaja o ir a buscar el resultado
+
+## 🔄 CAMBIOS / BANCO
+- Indicá SI o NO conviene hacer cambios en cada etapa y en qué posiciones priorizarlos (pilares, hooker, alas, etc.)
+---
+
+Estadísticas URBA 2025: ${statsContext}.
+Respondé siempre en español. Usá **negritas** para puntos clave. Si la pregunta no es sobre un rival específico, respondé de forma general con el mismo enfoque táctico.`;
 
   try {
     const response = await fetch(GEMINI_URL, {
@@ -1118,7 +1149,7 @@ Respondé siempre en español, de forma clara y concisa. Podés usar **negritas*
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: `${systemContext}\n\nPregunta: ${text}` }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 512 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
       })
     });
 

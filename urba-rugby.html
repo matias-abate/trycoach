@@ -1149,7 +1149,7 @@ Respondé siempre en español. Usá **negritas** para puntos clave. Si la pregun
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: `${systemContext}\n\nPregunta: ${text}` }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
       })
     });
 

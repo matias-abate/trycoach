@@ -1041,9 +1041,11 @@ function filterClubs(type, btn) {
   renderClubs(type);
 }
 
-// ─── GEMINI AI ────────────────────────────────────────────────────────────────
+// ─── APIs ────────────────────────────────────────────────────────────────────
 const GEMINI_API_KEY = '__GEMINI_API_KEY__';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+const OLLAMA_API_KEY = '__OLLAMA_API_KEY__';
+const OLLAMA_SEARCH_URL = 'https://ollama.com/api/web_search';
 
 let isTyping = false;
 const chatMessages = document.getElementById('chat-messages');
@@ -1093,6 +1095,34 @@ function hideTyping() {
   if (typing) typing.remove();
 }
 
+async function webSearch(query) {
+  try {
+    const res = await fetch(OLLAMA_SEARCH_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OLLAMA_API_KEY}`
+      },
+      body: JSON.stringify({ query, max_results: 5 })
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.results?.length) return null;
+    return data.results.map(r => `• ${r.title}: ${r.content}`).join('\n');
+  } catch {
+    return null;
+  }
+}
+
+function updateTypingText(text) {
+  const el = document.getElementById('typing-indicator');
+  if (el) {
+    el.querySelector('.typing-indicator').innerHTML = `
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--gold);text-transform:uppercase">${text}</span>
+    `;
+  }
+}
+
 async function sendMessage() {
   const input = document.getElementById('chat-input');
   const sendBtn = document.getElementById('send-btn');
@@ -1108,6 +1138,17 @@ async function sendMessage() {
   showTyping();
 
   const statsContext = clubs.map(c => `${c.name} (Pos ${c.pos}°, ${c.pts} pts, ${c.pg}G/${c.pe}E/${c.pp}P, ${c.tries} tries a favor, ${c.tryContra} en contra)`).join('; ');
+
+  // ── Buscar datos reales del rival con Ollama ──────────────────────────────
+  updateTypingText('Buscando datos del rival...');
+  const searchQuery = `${text} rugby URBA 2025 estadísticas rendimiento`;
+  const webData = await webSearch(searchQuery);
+
+  const webContext = webData
+    ? `\n\nDATOS REALES ENCONTRADOS EN LA WEB (usá estos para enriquecer el análisis):\n${webData}`
+    : '';
+
+  updateTypingText('Generando análisis táctico...');
 
   const systemContext = `Sos TRYCOACH, un asistente táctico experto en rugby de la URBA (Unión de Rugby de Buenos Aires).
 Cuando el usuario mencione un rival o un partido, SIEMPRE respondé con el siguiente formato estructurado:
@@ -1140,7 +1181,7 @@ Cuando el usuario mencione un rival o un partido, SIEMPRE respondé con el sigui
 - Indicá SI o NO conviene hacer cambios en cada etapa y en qué posiciones priorizarlos (pilares, hooker, alas, etc.)
 ---
 
-Estadísticas URBA 2025: ${statsContext}.
+Estadísticas URBA 2025: ${statsContext}.${webContext}
 Respondé siempre en español. Usá **negritas** para puntos clave. Si la pregunta no es sobre un rival específico, respondé de forma general con el mismo enfoque táctico.`;
 
   try {
@@ -1157,7 +1198,8 @@ Respondé siempre en español. Usá **negritas** para puntos clave. Si la pregun
     hideTyping();
 
     if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-      appendMessage('bot', data.candidates[0].content.parts[0].text);
+      const badge = webData ? '\n\n*🌐 Análisis enriquecido con datos en tiempo real*' : '';
+      appendMessage('bot', data.candidates[0].content.parts[0].text + badge);
     } else if (data.error) {
       appendMessage('bot', `⚠️ Error de API: ${data.error.message}`);
     } else {

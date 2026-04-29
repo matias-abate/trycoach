@@ -1042,10 +1042,9 @@ function filterClubs(type, btn) {
 }
 
 // ─── APIs ────────────────────────────────────────────────────────────────────
-const OLLAMA_API_KEY = '__OLLAMA_API_KEY__';
-const OLLAMA_SEARCH_URL = 'https://ollama.com/api/web_search';
-const OLLAMA_CHAT_URL  = 'https://ollama.com/api/chat';
-const OLLAMA_MODEL     = 'gemma3';
+const GROQ_API_KEY  = '__GROQ_API_KEY__';
+const GROQ_CHAT_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL    = 'llama-3.3-70b-versatile';
 
 let isTyping = false;
 const chatMessages = document.getElementById('chat-messages');
@@ -1096,22 +1095,7 @@ function hideTyping() {
 }
 
 async function webSearch(query) {
-  try {
-    const res = await fetch(OLLAMA_SEARCH_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OLLAMA_API_KEY}`
-      },
-      body: JSON.stringify({ query, max_results: 5 })
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data.results?.length) return null;
-    return data.results.map(r => `• ${r.title}: ${r.content}`).join('\n');
-  } catch {
-    return null;
-  }
+  return null; // Groq no tiene búsqueda web nativa
 }
 
 function updateTypingText(text) {
@@ -1177,14 +1161,14 @@ Respondé en español. Usá **negritas** para puntos clave.
 Pregunta: ${text}`;
 
   try {
-    const response = await fetch(OLLAMA_CHAT_URL, {
+    const response = await fetch(GROQ_CHAT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OLLAMA_API_KEY}`
+        'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: OLLAMA_MODEL,
+        model: GROQ_MODEL,
         messages: [{ role: 'user', content: prompt }],
         stream: false
       })
@@ -1193,11 +1177,10 @@ Pregunta: ${text}`;
     const data = await response.json();
     hideTyping();
 
-    if (data.message?.content) {
-      const badge = webData ? '\n\n*🌐 Análisis enriquecido con datos en tiempo real*' : '';
-      appendMessage('bot', data.message.content + badge);
+    if (data.choices?.[0]?.message?.content) {
+      appendMessage('bot', data.choices[0].message.content);
     } else if (data.error) {
-      appendMessage('bot', `⚠️ Error de API: ${data.error}`);
+      appendMessage('bot', `⚠️ Error de API: ${data.error.message}`);
     } else {
       appendMessage('bot', 'No pude procesar la respuesta. Intentá de nuevo.');
     }
